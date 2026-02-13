@@ -88,7 +88,10 @@ with tab1:
                 if len(bits) > len(flat_pixels):
                     st.error("Payload too large for this image capacity.")
                 else:
-                    flat_pixels[:len(bits)] = (flat_pixels[:len(bits)] & ~1) | bits
+                    # We cast to int16 temporarily to prevent overflow during bitwise math
+                    temp_pixels = flat_pixels[:len(bits)].astype(np.int16)
+                    temp_pixels = (temp_pixels & ~1) | bits
+                    flat_pixels[:len(bits)] = temp_pixels.astype(np.uint8)
                     stego_pixels = flat_pixels.reshape(pixels.shape)
                     stego_img = Image.fromarray(stego_pixels)
                     
