@@ -22,21 +22,19 @@ class KavachEngine:
             return zlib.decompress(unpad(cipher.decrypt(data), 16)).decode()
         except: return None
 
-# --- UI CONFIGURATION: NEON PRISM THEME ---
+# --- UI CONFIGURATION & CSS (FIXED SYNTAX) ---
 st.set_page_config(page_title="Kavach Prism Defense", page_icon="💎", layout="wide")
 
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Space+Grotesk:wght@300;500&display=swap');
     
-    /* Dynamic Background Gradient */
     .stApp {
         background: linear-gradient(125deg, #050505 0%, #0a0a12 50%, #050505 100%);
         color: #ffffff;
         font-family: 'Space Grotesk', sans-serif;
     }
     
-    /* Glowing Title */
     .prism-title {
         font-family: 'Syncopate', sans-serif;
         font-weight: 700;
@@ -48,7 +46,6 @@ st.markdown("""
         margin-bottom: 0px;
     }
 
-    /* Glassmorphism Cards */
     .stTabs [data-baseweb="tab-panel"] {
         background: rgba(255, 255, 255, 0.03);
         backdrop-filter: blur(12px);
@@ -58,9 +55,17 @@ st.markdown("""
         margin-top: 20px;
     }
 
-    /* Tab Colors */
-    .stTabs [data-baseweb="tab"] {
-        font-weight: 600;
-        transition: all 0.3s ease;
+    .stButton>button {
+        background: transparent;
+        border: 2px solid #00f2ff;
+        color: #00f2ff;
+        border-radius: 50px;
+        padding: 10px 40px;
+        font-weight: bold;
+        transition: 0.4s;
+        width: 100%;
     }
-    #tabs-b
+    .stButton>button:hover {
+        background: #00f2ff;
+        color: #000;
+        box-
