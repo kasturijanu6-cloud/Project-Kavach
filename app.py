@@ -5,11 +5,11 @@ from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
 from PIL import Image
 
-# --- THE CAULDRON: CORE CRYPTO ---
+# --- THE CORE ENGINE ---
 class KavachEngine:
     def __init__(self, password):
         self.key = hashlib.sha256(password.encode()).digest()
-        self.delimiter = b'::SPOOKY_END_OF_STRING::'
+        self.delimiter = b'::PRISM_GUARD_SECURE::'
 
     def encrypt(self, text):
         cipher = AES.new(self.key, AES.MODE_CBC)
@@ -22,63 +22,45 @@ class KavachEngine:
             return zlib.decompress(unpad(cipher.decrypt(data), 16)).decode()
         except: return None
 
-# --- UI CONFIGURATION: HALLOWEEN THEME ---
-st.set_page_config(page_title="Kavach: Cursed Crypt", page_icon="🎃", layout="wide")
+# --- UI CONFIGURATION: NEON PRISM THEME ---
+st.set_page_config(page_title="Kavach Prism Defense", page_icon="💎", layout="wide")
 
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Creepster&family=Nosifer&family=Special+Elite&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Space+Grotesk:wght@300;500&display=swap');
     
+    /* Dynamic Background Gradient */
     .stApp {
-        background: radial-gradient(circle, #1a0033 0%, #000000 100%);
-        color: #ff6600;
-        font-family: 'Special Elite', cursor;
+        background: linear-gradient(125deg, #050505 0%, #0a0a12 50%, #050505 100%);
+        color: #ffffff;
+        font-family: 'Space Grotesk', sans-serif;
     }
     
-    h1 {
-        font-family: 'Nosifer', sans-serif !important;
-        color: #ff6600 !important;
-        text-shadow: 0 0 15px #ff0000;
+    /* Glowing Title */
+    .prism-title {
+        font-family: 'Syncopate', sans-serif;
+        font-weight: 700;
+        font-size: 3rem;
+        background: linear-gradient(90deg, #00f2ff, #7000ff, #ff0055);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
         text-align: center;
+        margin-bottom: 0px;
     }
 
-    h2, h3 {
-        font-family: 'Creepster', cursive !important;
-        color: #9933ff !important;
-        letter-spacing: 3px;
+    /* Glassmorphism Cards */
+    .stTabs [data-baseweb="tab-panel"] {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(12px);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 30px;
+        margin-top: 20px;
     }
 
-    /* Spooky Tab Styling */
-    .stTabs [data-baseweb="tab-list"] { gap: 20px; }
+    /* Tab Colors */
     .stTabs [data-baseweb="tab"] {
-        color: #ff660088;
-        background: #111;
-        border: 1px solid #9933ff33;
-        padding: 10px 20px;
+        font-weight: 600;
+        transition: all 0.3s ease;
     }
-    .stTabs [aria-selected="true"] {
-        color: #ff6600 !important;
-        border: 1px solid #ff6600 !important;
-        box-shadow: 0 0 20px #ff660044;
-    }
-
-    /* Neon Orange Buttons */
-    .stButton>button {
-        background: transparent;
-        color: #ff6600 !important;
-        border: 2px solid #ff6600 !important;
-        border-radius: 10px;
-        font-weight: bold;
-        transition: 0.3s;
-    }
-    
-    .stButton>button:hover {
-        background: #ff6600 !important;
-        color: #000 !important;
-        box-shadow: 0 0 30px #ff6600;
-    }
-    </style>
-""", unsafe_allow_html=True)
-
-# --- HEADER ---
-st.title("
+    #tabs-b
