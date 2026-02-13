@@ -5,16 +5,18 @@ from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
 from PIL import Image
 
-# --- MODULE 2: THE FORTRESS (Logic) ---
+# --- THE FORTRESS: HARDENED LOGIC ---
 class KavachEngine:
     def __init__(self, password):
+        # SHA-256 Key Stretching
         self.key = hashlib.sha256(password.encode()).digest()
-        self.delimiter = b'::KAVACH_EOS::'
+        self.delimiter = b'::KAVACH_ALPHA_SHIELD::'
 
     def encrypt(self, text):
         cipher = AES.new(self.key, AES.MODE_CBC)
-        # Structure: IV + Encrypted Data + Delimiter
-        return cipher.iv + cipher.encrypt(pad(zlib.compress(text.encode()), 16)) + self.delimiter
+        compressed = zlib.compress(text.encode())
+        encrypted = cipher.encrypt(pad(compressed, 16))
+        return cipher.iv + encrypted + self.delimiter
 
     def decrypt(self, blob):
         try:
@@ -22,148 +24,129 @@ class KavachEngine:
             cipher = AES.new(self.key, AES.MODE_CBC, iv)
             decrypted = unpad(cipher.decrypt(data), 16)
             return zlib.decompress(decrypted).decode()
-        except:
-            return None
+        except: return None
 
-# --- UI CONFIG & CYBERPUNK STYLING ---
-st.set_page_config(page_title="Project Kavach", page_icon="☣️", layout="wide")
+# --- UI CONFIGURATION & GLASSMORPHISM ---
+st.set_page_config(page_title="Project Kavach Elite", page_icon="☣️", layout="wide")
 
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=JetBrains+Mono&display=swap');
     
+    /* Main Background */
     .stApp {
-        background-color: #0a0a0b;
-        color: #00ffcc;
-        font-family: 'Fira Code', monospace;
+        background: radial-gradient(circle at top, #0d1b2a 0%, #000814 100%);
+        color: #00f2ff;
+        font-family: 'JetBrains Mono', monospace;
     }
     
-    /* Neon Borders for Inputs */
-    .stTextInput>div>div>input, .stTextArea>div>div>textarea {
-        background-color: #121214 !important;
-        color: #00ffcc !important;
-        border: 1px solid #00ffcc44 !important;
+    /* Glassmorphism Containers */
+    div[data-testid="stVerticalBlock"] > div:has(div.stButton) {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 20px;
+        border: 1px solid rgba(0, 242, 255, 0.2);
     }
     
-    /* Futuristic Tabs */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 20px;
-        background-color: transparent;
+    /* Neon Titles */
+    h1, h2, h3 {
+        font-family: 'Orbitron', sans-serif !important;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: #00f2ff !important;
+        text-shadow: 0 0 10px #00f2ff88;
     }
     
-    .stTabs [data-baseweb="tab"] {
-        background-color: #1a1a1c;
-        border: 1px solid #333;
-        padding: 10px 30px;
-        color: #888;
+    /* Custom Buttons */
+    .stButton>button {
+        background: linear-gradient(90deg, #00f2ff, #0066ff);
+        color: white !important;
+        border: none;
+        padding: 10px 24px;
+        border-radius: 8px;
+        font-weight: bold;
+        width: 100%;
+        transition: 0.3s all;
     }
-
-    .stTabs [aria-selected="true"] {
-        color: #00ffcc !important;
-        border: 1px solid #00ffcc !important;
-        box-shadow: 0 0 10px #00ffcc44;
-    }
-
-    /* Metric Cards */
-    [data-testid="stMetricValue"] {
-        color: #00ffcc;
-        font-size: 24px;
+    
+    .stButton>button:hover {
+        box-shadow: 0 0 20px #00f2ff;
+        transform: translateY(-2px);
     }
     </style>
 """, unsafe_allow_html=True)
 
-# --- HEADER ---
-st.title("☣️ KAVACH SYSTEM TERMINAL")
-st.write("`STATUS: ENCRYPTION_ACTIVE | PROTOCOL: AES-256-CBC`")
+# --- HEADER SECTION ---
+st.title("☣️ KAVACH ELITE : DEFENSE TERMINAL")
+st.write("`CONNECTED: SECURE_NODE_ALPHA | KERNEL: AES-256-SHA256`")
 st.divider()
 
-tab1, tab2, tab3 = st.tabs(["[ 1 ] THE SHIELD (Encoder)", "[ 2 ] THE SENTRY (Decoder)", "[ 3 ] SYSTEM_LOGS"])
+tab1, tab2, tab3 = st.tabs(["[ 🔒 SHIELD ENCODER ]", "[ 🔍 SENTRY DECODER ]", "[ 📊 ANALYTICS ]"])
 
-# --- MODULE 1: ENCODER ---
+# --- TAB 1: ENCODER ---
 with tab1:
-    col_l, col_r = st.columns([1, 1])
-    
-    with col_l:
-        st.subheader("📡 Input Stream")
-        carrier = st.file_uploader("Upload Carrier Frame (PNG)", type=["png"])
-        secret = st.text_area("Secret Message", height=150, placeholder="Classified information...")
-        key = st.text_input("Security Key", type="password")
+    c1, c2 = st.columns([1, 1.2])
+    with c1:
+        st.subheader("Payload Injection")
+        carrier = st.file_uploader("Upload Carrier Image (PNG)", type=["png"])
+        secret = st.text_area("Secret Message", height=120)
+        pwd = st.text_input("Encryption Key", type="password")
         
-    if st.button("ACTIVATE KAVACH SHIELD") and carrier and secret and key:
-        with st.status("Initializing Stealth Sequence...") as status:
-            engine = KavachEngine(key)
-            img = Image.open(carrier).convert('RGB')
-            pixels = np.array(img)
-            
-            st.write("Locking Cryptographic Layer...")
-            protected_blob = engine.encrypt(secret)
-            bits = np.unpackbits(np.frombuffer(protected_blob, dtype=np.uint8))
-            
-            flat_pixels = pixels.flatten()
-            
-            if len(bits) > len(flat_pixels):
-                st.error("INSUFFICIENT_CAPACITY: Image frame too small.")
-            else:
-                st.write("Injecting Bits into Spatial Domain...")
-                # PREVENT OVERFLOW ERROR: Use int16 for math
-                temp = flat_pixels[:len(bits)].astype(np.int16)
-                temp = (temp & ~1) | bits
-                flat_pixels[:len(bits)] = temp.astype(np.uint8)
+        if st.button("ACTIVATE DEFENSE SHIELD") and carrier and secret and pwd:
+            with st.status("Deploying Kavach...") as status:
+                engine = KavachEngine(pwd)
+                img = Image.open(carrier).convert('RGB')
+                pixels = np.array(img)
                 
-                stego_img = Image.fromarray(flat_pixels.reshape(pixels.shape))
+                # Encrypt
+                st.write("Applying AES-256 Cryptography...")
+                protected = engine.encrypt(secret)
+                bits = np.unpackbits(np.frombuffer(protected, dtype=np.uint8))
                 
-                # MODULE 3 ANALYSIS: PSNR
-                mse = np.mean((pixels.astype(np.float32) - flat_pixels.reshape(pixels.shape).astype(np.float32)) ** 2)
-                psnr = 100.0 if mse == 0 else 20 * math.log10(255.0 / math.sqrt(mse))
-                
-                with col_r:
-                    st.subheader("🛰️ Output Verification")
-                    st.image(stego_img, caption="Stego-Object (Hidden Data)", use_container_width=True)
+                flat = pixels.flatten()
+                if len(bits) > len(flat):
+                    st.error("DATA OVERLOAD: Use a larger carrier image.")
+                else:
+                    st.write("Executing Stealth Embedding...")
+                    # Hardened LSB logic (int16 fix included)
+                    temp = flat[:len(bits)].astype(np.int16)
+                    temp = (temp & ~1) | bits
+                    flat[:len(bits)] = temp.astype(np.uint8)
                     
-                    m1, m2 = st.columns(2)
-                    m1.metric("Visual Integrity", f"{psnr:.2f} dB")
-                    m2.metric("Data Density", f"{len(bits)} bits")
+                    stego_img = Image.fromarray(flat.reshape(pixels.shape))
                     
-                    buf = io.BytesIO()
-                    stego_img.save(buf, format="PNG")
-                    st.download_button("💾 DOWNLOAD SHIELDED IMAGE", buf.getvalue(), "kavach_stego.png")
-            status.update(label="Sequence Complete", state="complete")
+                    # Metrics
+                    mse = np.mean((pixels.astype(np.float32) - flat.reshape(pixels.shape).astype(np.float32))**2)
+                    psnr = 100 if mse == 0 else 20 * math.log10(255.0 / math.sqrt(mse))
+                    
+                    with c2:
+                        st.subheader("Transmission Ready")
+                        st.image(stego_img, caption="Shielded Stego-Object", use_container_width=True)
+                        
+                        # Scoreboard
+                        col_m1, col_m2 = st.columns(2)
+                        col_m1.metric("STEALTH (PSNR)", f"{psnr:.2f} dB")
+                        col_m2.metric("DEFENSE SCORE", f"{min(100, int(psnr + 20))}%")
+                        
+                        buf = io.BytesIO()
+                        stego_img.save(buf, format="PNG")
+                        st.download_button("💾 EXPORT SECURE FILE", buf.getvalue(), "kavach_alpha.png")
+                status.update(label="Shield Deployment Successful", state="complete")
 
-# --- MODULE 3: DECODER ---
+# --- TAB 2: DECODER ---
 with tab2:
-    st.subheader("🔍 Deep Scan Analysis")
-    stego_file = st.file_uploader("Analyze Stego-Image", type=["png"], key="dec")
-    dec_pass = st.text_input("Sentry Access Key", type="password", key="p2")
+    st.subheader("Signal Interception & Decryption")
+    stego_in = st.file_uploader("Upload Stego-Frame", type=["png"], key="dec_in")
+    key_in = st.text_input("Enter Defense Key", type="password", key="k_in")
     
-    if st.button("RUN EXTRACTION") and stego_file and dec_pass:
-        engine = KavachEngine(dec_pass)
-        img = Image.open(stego_file).convert('RGB')
-        pixels = np.array(img).flatten()
+    if st.button("START DEEP SCAN"):
+        engine = KavachEngine(key_in)
+        img_d = Image.open(stego_in).convert('RGB')
+        bits_d = np.array(img_d).flatten() & 1
+        bytes_d = np.packbits(bits_d).tobytes()
         
-        # Extraction logic
-        bits = pixels & 1
-        byte_arr = np.packbits(bits).tobytes()
-        
-        if engine.delimiter in byte_arr:
-            payload = byte_arr.split(engine.delimiter)[0]
-            decoded = engine.decrypt(payload)
-            
+        if engine.delimiter in bytes_d:
+            raw = bytes_d.split(engine.delimiter)[0]
+            decoded = engine.decrypt(raw)
             if decoded:
-                st.success("✅ DECRYPTION SUCCESSFUL")
-                st.code(decoded, language="text")
-            else:
-                st.error("❌ KEY MISMATCH: Access Denied")
-        else:
-            st.error("⚠️ NO KAVACH PAYLOAD DETECTED")
-
-# --- SYSTEM SPECS ---
-with tab3:
-    st.subheader("⚙️ Hardware & Protocol Specs")
-    st.markdown("""
-    - **Encryption Engine:** AES-256 (Cipher Block Chaining)
-    - **Key Stretching:** SHA-256 Digest
-    - **Methodology:** LSB Substitution with Integer-Hardening
-    - **Visual Metrics:** PSNR-based Integrity Check
-    """)
-    st.progress(1.0)
-    st.write("`System integrity 100% | Uptime: Battle Ready`")
