@@ -35,64 +35,127 @@ st.markdown("""
         font-family: 'JetBrains Mono', monospace;
     }
     
-    /* Neon Title Animation */
     .hyper-title {
         font-family: 'Orbitron', sans-serif;
-        font-size: 4rem;
+        font-size: 3.5rem;
         font-weight: 700;
         text-align: center;
         background: linear-gradient(90deg, #39ff14, #bc13fe, #00f2ff, #39ff14);
         background-size: 300%;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        animation: glow 10s linear infinite;
-        margin-bottom: 0px;
+        animation: glow 8s linear infinite;
     }
     @keyframes glow { 0% { background-position: 0%; } 100% { background-position: 300%; } }
 
-    /* Glassmorphism Tabs */
-    .stTabs [data-baseweb="tab-list"] { gap: 30px; background-color: transparent; }
+    .stTabs [data-baseweb="tab-list"] { gap: 30px; }
     .stTabs [data-baseweb="tab"] {
-        height: 60px;
+        height: 50px;
         font-family: 'Orbitron', sans-serif;
-        font-size: 1.2rem;
         background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 10px 10px 0 0;
+        border-radius: 5px;
         color: #888;
-        padding: 0 40px;
     }
     .stTabs [aria-selected="true"] {
-        background: rgba(0, 242, 255, 0.1) !important;
         border: 1px solid #00f2ff !important;
         color: #00f2ff !important;
         box-shadow: 0px 0px 15px #00f2ff55;
     }
 
-    /* Cyber Buttons */
     .stButton>button {
         background: transparent;
         border: 2px solid #39ff14;
         color: #39ff14;
         font-family: 'Orbitron', sans-serif;
-        font-weight: bold;
         border-radius: 0px;
-        transition: 0.5s;
-        text-transform: uppercase;
-        height: 3em;
         width: 100%;
+        transition: 0.5s;
     }
     .stButton>button:hover {
         background: #39ff14;
         color: #000;
         box-shadow: 0 0 40px #39ff14;
-        transform: scale(1.02);
     }
     </style>
     """, unsafe_allow_html=True)
 
-# --- MAIN INTERFACE ---
 st.markdown('<h1 class="hyper-title">KAVACH ELITE</h1>', unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: #bc13fe; font-family: Orbitron;'><b>CORE PROTOCOL // AES-256 // LSB-INT16</b></p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #bc13fe; font-family: Orbitron;'><b>PROTOCOL: AES-256-CBC | ENGINE: HARDENED-LSB</b></p>", unsafe_allow_html=True)
 
-t1, t2, t3 = st.tabs(["[ 1. SHIELD_ENCODE ]", "[ 2.
+t1, t2, t3 = st.tabs(["[ SHIELD_ENCODE ]", "[ SENTRY_DECODE ]", "[ SYSTEM_AUDIT ]"])
+
+# --- TAB 1: ENCODER (FIXED LINE 98 ERROR) ---
+with t1:
+    c1, c2 = st.columns([1, 1.2])
+    with c1:
+        st.subheader("📡 PAYLOAD INJECTION")
+        carrier = st.file_uploader("LOAD CARRIER (PNG)", type=["png"])
+        secret = st.text_area("SECRET DATA", placeholder="Classified transmission...")
+        key = st.text_input("ACCESS KEY", type="password")
+        
+    if st.button("EXECUTE ENCODING SEQUENCE") and carrier and secret and key:
+        with st.status("Initiating Quantum Stealth...") as status:
+            engine = KavachEngine(key)
+            img = Image.open(carrier).convert('RGB')
+            pixels = np.array(img)
+            
+            blob = engine.encrypt(secret)
+            bits = np.unpackbits(np.frombuffer(blob, dtype=np.uint8))
+            
+            flat = pixels.flatten()
+            if len(bits) > len(flat):
+                st.error("⚠️ CAPACITY BREACH")
+            else:
+                # --- CORRECTED LOGIC FOR LINE 98 ---
+                # We cast to int16 to prevent the OverflowError
+                st.write("Applying 16-bit Hardened Mapping...")
+                buffer_pixels = flat[:len(bits)].astype(np.int16) 
+                # Injection happens in the larger 16-bit space
+                buffer_pixels = (buffer_pixels & ~1) | bits 
+                # Cast back to standard image format (uint8)
+                flat[:len(bits)] = buffer_pixels.astype(np.uint8) 
+                
+                stego_img = Image.fromarray(flat.reshape(pixels.shape))
+                
+                # Metrics
+                mse = np.mean((pixels.astype(np.float32) - flat.reshape(pixels.shape).astype(np.float32))**2)
+                psnr = 100 if mse == 0 else 20 * math.log10(255.0 / math.sqrt(mse))
+                
+                with c2:
+                    st.image(stego_img, use_container_width=True)
+                    st.metric("FIDELITY (PSNR)", f"{psnr:.2f} dB")
+                    buf = io.BytesIO()
+                    stego_img.save(buf, format="PNG")
+                    st.download_button("💾 DOWNLOAD SECURE_IMAGE.PNG", buf.getvalue(), "kavach_v6.png")
+            status.update(label="Sequence Successful", state="complete")
+
+# --- TAB 2: DECODER ---
+with t2:
+    st.subheader("🔍 DEEP SIGNAL SCAN")
+    stego_in = st.file_uploader("UPLOAD STEGO-FRAME", type=["png"], key="dec")
+    key_in = st.text_input("DECRYPT_KEY", type="password", key="key")
+    
+    if st.button("RUN EXTRACTION") and stego_in and key_in:
+        engine = KavachEngine(key_in)
+        img_d = Image.open(stego_in).convert('RGB')
+        bits_d = np.array(img_d).flatten() & 1
+        bytes_d = np.packbits(bits_d).tobytes()
+        
+        if engine.delimiter in bytes_d:
+            raw = bytes_d.split(engine.delimiter)[0]
+            result = engine.decrypt(raw)
+            if result:
+                st.success("✅ AUTHENTICATION VERIFIED")
+                st.code(result)
+            else: st.error("❌ KEY MISMATCH")
+        else: st.error("⚠️ NO SIGNATURE DETECTED")
+
+# --- TAB 3: AUDIT ---
+with t3:
+    st.subheader("⚙️ CORE ARCHITECTURE")
+    st.markdown("""
+    - **Stealth Engine:** Spatial Domain LSB mapping with 16-bit overflow protection.
+    - **Encryption:** AES-256-CBC with randomized IV.
+    - **Integrity:** PSNR-based visual audit layer.
+    """)
+    st.progress(1.0)
