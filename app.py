@@ -65,7 +65,7 @@ with tab_enc:
             else:
                 status.update(label="Injecting Bits into LSB Space...", state="running")
                 flat = pixels.flatten()
-                flat[:len(bits)] = (flat[:len(bits)] & ~1) | bits
+                flat[:len(bits)] = (flat[:len(bits)] & 254) | bits
                 stego = flat.reshape(pixels.shape).astype(np.uint8)
                 
                 # Analysis
